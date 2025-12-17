@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <passenger.h>
+#include "passenger.h"
 
 Passenger *confirmedHead = NULL; // Abhigyan- "ami ei line ta add korechi... reason meeting e bolbo"
 Passenger *waitingHead = NULL;
@@ -31,8 +31,8 @@ void insert_Pass (Passenger **head, Passenger *newPas)
         newPas -> next = newPas;
         return ;
     }
-    Passenger *temp = head;
-    while (temp->next != head)
+    Passenger *temp = *head;
+    while (temp->next != *head)
         temp = temp-> next;
     temp->next = newPas;
     newPas->next = *head ;

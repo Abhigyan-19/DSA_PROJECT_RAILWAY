@@ -1,6 +1,6 @@
-# include <logic.h>
-# include "DSA_PROJECT_RAILWAY\Passengers\passenger.h"
-# include "DSA_PROJECT_RAILWAY\Database\csv.h"
+# include "logic.h"
+# include "..\Passengers\passenger.h"
+# include "..\Database\csv.h"
 # include <stdio.h>
 
 
@@ -42,7 +42,7 @@ int cancelPassenger(int id) {
     delete_Pass(&confirmedHead, id);
     Confirmed--;
 
-    // 3. Move WL → Confirm if WL is not empty
+    // 3. Move WL to Confirm if WL is not empty
     if (waitingHead != NULL) {
         moveWLToConfirm();
     }
