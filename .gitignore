@@ -1,0 +1,30 @@
+# Compiled binaries
+*.exe
+*.out
+*.o
+*.obj
+
+# Build directories
+build/
+bin/
+dist/
+
+# Generated runtime data
+Database/*.csv
+
+# Logs
+*.log
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*~
+
+# Third-party / embedded libraries
+API/mongoose.c
+API/mongoose.h
+

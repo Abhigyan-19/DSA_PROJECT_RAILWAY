@@ -1,116 +1,87 @@
-# include "logic.h"
-# include "..\Passengers\passenger.h"
-# include "..\Database\csv.h"
-# include <stdio.h>
+#include "logic.h"
+#include "../Passengers/passenger.h"
+#include "../Database/csv.h"
 
+#include <stdio.h>
+#include <string.h>
 
+/* Initialize counters */
 int maxSeats = 10;
 int Confirmed = 0;
 int Waiting = 0;
-int addPassenger(int id, char *name, int age, char *src, char *dest, char *berth){
-    if (Confirmed < maxSeats){
-        Passenger *p = search_Pass (confirmedHead,id);
-            if (p != NULL){
-                printf ("ID already exists!\n"); 
-                return 0;    
-            }
-        Passenger *newPas = create_Pass (id, age, name, src, dest, berth, "CONFIRMED!");
-         insert_Pass(&confirmedHead, newPas);
-        Confirmed ++;
 
-    }
-    else{
-        Passenger *newPas = create_Pass (id, age, name, src, dest, berth, "WL");
-        insert_Pass(&waitingHead, newPas);  
-        Waiting ++;
-        printf ("SORRY! We are getting inspired from Indigo. You are in the Waiting List");
+/* Next passenger ID to assign */
+int nextId = 1;
 
+/* CSV file path */
+const char *csvFile = "Database/passengers.csv";
+
+/* Add Passenger */
+int addPassenger(const char *name, int age, const char *src, const char *dest, const char *berth)
+{
+    int id = nextId++;  // Auto-generate ID
+
+    Passenger *newPas;
+
+    if (Confirmed < maxSeats) {
+        newPas = create_Pass(id, age, name, src, dest, berth, "CONFIRMED");
+        insert_Pass(&confirmedHead, newPas);
+        Confirmed++;
+        printf("Ticket confirmed for passenger %d\n", id);
+    } else {
+        newPas = create_Pass(id, age, name, src, dest, berth, "WL");
+        insert_Pass(&waitingHead, newPas);
+        Waiting++;
+        printf("No seats available. Passenger %d added to waiting list.\n", id);
     }
+
+    /* Save to CSV */
+    saveData(confirmedHead, waitingHead, csvFile);
+
+    return id;  // Return the generated ID
 }
 
-int cancelPassenger(int id) {
-
-    // 1. Search in confirmed list
+/* Cancel Passenger */
+int cancelPassenger(int id)
+{
     Passenger *p = search_Pass(confirmedHead, id);
 
-    if (p == NULL) {
-        printf("Passenger ID not found in confirmed list.\n");
+    if (!p) {
+        printf("Passenger ID %d not found in confirmed list.\n", id);
         return 0;
     }
 
-    // 2. Remove the passenger from confirmed circular LL
     delete_Pass(&confirmedHead, id);
     Confirmed--;
 
-    // 3. Move WL to Confirm if WL is not empty
-    if (waitingHead != NULL) {
-        moveWLToConfirm();
-    }
+    moveWLToConfirm();
 
-    // 4. Save to CSV
-    saveData(confirmedHead, waitingHead);
+    /* Save to CSV */
+    saveData(confirmedHead, waitingHead, csvFile);
 
-    printf("Passenger cancelled successfully.\n");
+    printf("Passenger %d cancelled successfully.\n", id);
     return 1;
 }
 
-int moveWLToConfirm() {
+/* Move Waiting List Passenger to Confirmed */
+int moveWLToConfirm(void)
+{
+    if (!waitingHead || Confirmed >= maxSeats) return 0;
 
-    // 1. Check if WL is empty
-    if (waitingHead == NULL) {
-        return 0;   // No one to move
-    }
-
-    // 2. Pick the first WL passenger
     Passenger *p = waitingHead;
 
-    // 3. Remove from WL
     delete_Pass(&waitingHead, p->id);
     Waiting--;
 
-    // 4. Change status
     strcpy(p->status, "CONFIRMED");
 
-    // 5. Insert into confirmed list
     insert_Pass(&confirmedHead, p);
     Confirmed++;
 
-    // 6. Save to CSV
-    saveData(confirmedHead, waitingHead);
+    printf("Waiting passenger %d promoted to confirmed.\n", p->id);
 
-    printf("Waiting list passenger %d moved to confirmed.\n", p->id);
-
-    return 1;
-}
-
-int moveWLToConfirm() {
-
-    // 1. Check if WL is empty
-    if (waitingHead == NULL) {
-        return 0;   // No one to move
-    }
-
-    // 2. Pick the first WL passenger
-    Passenger *p = waitingHead;
-
-    // 3. Remove from WL
-    delete_Pass(&waitingHead, p->id);
-    Waiting--;
-
-    // 4. Change status
-    strcpy(p->status, "CONFIRMED");
-
-    // 5. Insert into confirmed list
-    insert_Pass(&confirmedHead, p);
-    Confirmed++;
-
-    // 6. Save to CSV
-    saveData(confirmedHead, waitingHead);
-
-    printf("Waiting list passenger %d moved to confirmed.\n", p->id);
+    /* Save to CSV */
+    saveData(confirmedHead, waitingHead, csvFile);
 
     return 1;
 }
-
-
-
